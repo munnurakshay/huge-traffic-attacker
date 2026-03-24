@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cloud Antivirus Dashboard</title>
+
+  <style>
+    body {
+      background: black;
+      color: #00ffcc;
+      font-family: monospace;
+      padding: 20px;
+    }
+
+    .card {
+      border: 1px solid #00ffcc;
+      padding: 15px;
+      margin-top: 10px;
+    }
+
+    #logs {
+      margin-top: 20px;
+      height: 300px;
+      overflow-y: auto;
+      border: 1px solid #00ffcc;
+      padding: 10px;
+    }
+
+    .bot { color: red; }
+    .human { color: #00ffcc; }
+  </style>
+</head>
+
+<body>
+
+<h2>🛡️ Cloud Antivirus Dashboard</h2>
+
+<div class="card">
+  Total Requests: <span id="req">0</span><br>
+  Active IPs: <span id="ips">0</span><br>
+  Blocked IPs: <span id="blocked">0</span><br><br>
+
+  🧑 Human Requests: <span id="human">0</span><br>
+  🤖 Bot Requests: <span id="bot">0</span>
+</div>
+
+<div id="logs"></div>
+
+<script>
+const API = "http://localhost:3000";
+
+setInterval(async () => {
+  try {
+    const res = await fetch(API + "/api/stats");
+    const data = await res.json();
+
+    document.getElementById("req").innerText = data.totalRequests;
+    document.getElementById("ips").innerText = data.totalIPs;
+    document.getElementById("blocked").innerText = data.blockedIPs.length;
+
+    document.getElementById("human").innerText = data.humanRequests;
+    document.getElementById("bot").innerText = data.botRequests;
+
+    const logDiv = document.getElementById("logs");
+    logDiv.innerHTML = data.logs
+      .map(l => `<div class="${l.includes('BOT') ? 'bot' : 'human'}">> ${l}</div>`)
+      .join("");
+
+  } catch (err) {
+    console.log(err);
+  }
+}, 1000);
+</script>
+
+</body>
+</html>
